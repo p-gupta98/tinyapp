@@ -41,7 +41,7 @@ app.post("/urls", (req, res) => {
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
-  console.log(urlDatabase); // Log the POST request body to the console
+  //console.log(urlDatabase); // Log the POST request body to the console
   //res.send("redirected to /urls/:id"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${id}`);
 });
@@ -61,7 +61,6 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
-  console.log(req.body);
   res.redirect(longURL);
 });
 
