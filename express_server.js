@@ -1,7 +1,13 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-function generateRandomString() {}
+function generateRandomString(arr) {
+  let result = '';
+  for (let i = 6; i > 0; i--) {
+    result += arr[(Math.floor(Math.random() * arr.length))];
+  }
+  return result;
+};
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
