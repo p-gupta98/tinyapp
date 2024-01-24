@@ -64,7 +64,13 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-
+app.post('/urls/:id/delete', (req, res) => {
+  //console.log('hello12345');
+  const id = req.params.id
+  const longURL = urlDatabase[id];
+  delete urlDatabase[id];
+  res.redirect("/urls");
+});
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
