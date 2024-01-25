@@ -6,28 +6,38 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 function generateRandomString() {
-  let result = '';
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 6; i > 0; i--) {
-    result += chars.charAt((Math.floor(Math.random() * chars.length)));
-  }
-  return result;
-};
-
+  const randomString = Math.random().toString(36).substring(2, 8);
+  return randomString;
+}
+generateRandomString();
 
 app.set("view engine", "ejs");
 
 //middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
 app.use(morgan('dev'));
 
+//global objects
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  abcdef: {
+    id: "abcdef",
+    email: "mon@example.com",
+    password: "purple",
+  },
+  ghijkl: {
+    id: "ghijkl",
+    email: "len@example.com",
+    password: "fuzz",
+  },
+};
+
+//get and post reqs
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -107,6 +117,25 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  console.log(req.body);
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const user = {
+    id: id, 
+    email: email,
+    password: password,
+  };
+
+  users[id] = user;
+
+  console.log(users);
+  res.redirect('/urls');
+
 });
 
 app.listen(PORT, () => {
