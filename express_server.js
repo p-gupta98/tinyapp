@@ -132,8 +132,11 @@ app.post('/register', (req, res) => {
   };
 
   users[id] = user;
-
   console.log(users);
+
+  //set cookie
+  res.cookie('user_id', id);
+
   res.redirect('/urls');
 
 });
