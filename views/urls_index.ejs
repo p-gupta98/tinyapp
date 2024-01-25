@@ -37,7 +37,7 @@
               <td><%= id %></td>
               <td><%= urls[id] %></td>
               <td>
-                <form method="POST" action='/urls'>
+                <form method="GET" action='/urls/<%= id %>'>
                   <button type="submit" class="btn">Edit</button>
                 </form>
               </td>
