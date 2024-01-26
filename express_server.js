@@ -110,12 +110,34 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-// app.post('/login', (req, res) => {
-//   const username = req.body.username;
+app.post('/login', (req, res) => {
+  //extract values from the form
+  const email = req.body.email
+  const password = req.body.password;
 
-//   res.cookie('username', username);
-//   res.redirect('/urls');
-// });
+  //match the values to user in users object
+  let foundUser = null;
+
+  for (const user_id in users) {
+    const user = users[user_id];
+    if (user.email === email) {
+      foundUser = user;
+    }
+  }
+
+  //was the user not in the database
+  if(!foundUser) {
+    return res.status(403).send('user not found');
+  //if email was found match the passwords
+  } else {
+    if (foundUser.password !== password) {
+      return res.status(403).send('password does not match');
+    }
+  }
+
+  res.cookie('user_id', foundUser.user_id);
+  res.redirect('/urls');
+});
 
 app.get('/login', (req, res) => {
   res.render('login');
@@ -124,7 +146,7 @@ app.get('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
 
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get('/register', (req, res) => {
@@ -138,7 +160,7 @@ app.post('/register', (req, res) => {
 
    //if email and password are empty
    if (!email || !password) {
-    return res.status(400).send('Provide username and password') 
+    return res.status(400).send('Provide email and password') 
    }
 
    //check if user is already in the database
