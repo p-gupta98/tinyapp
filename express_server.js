@@ -128,20 +128,41 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+   //if email and password are empty
+   if (!email || !password) {
+    return res.status(400).send('Provide username and password') 
+   }
+
+   //check if user is already in the database
+   let foundUser = null;
+   
+   for (const user_id in users) {
+    const user = users[user_id];
+    if (user.email === email) {
+      foundUser = user;
+    }
+   }
+
+   //was the user already in the database
+   if (foundUser) {
+    return res.status(400).send('email already exists')
+   }
+
+  //passed all checks, create new user
   const user = {
     user_id: user_id, 
     email: email,
     password: password,
   };
 
+  //add to database
   users[user_id] = user;
-  console.log(users);
+  // console.log(users);
 
   //set cookie
   res.cookie('user_id', user_id);
 
   res.redirect('/urls');
-
 });
 
 app.listen(PORT, () => {
