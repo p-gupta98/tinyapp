@@ -47,9 +47,11 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const user_id = req.cookies['user_id'];
+  const user = users[user_id];
   const templateVars = { 
     urls: urlDatabase, 
-    username: req.cookies['username'] 
+    user: user, 
   };
   res.render("urls_index", templateVars);
 });
@@ -64,17 +66,19 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const username = req.cookies['username'];
-  const templateVars = { username };
+  const user_id = req.cookies['user_id'];
+  const user = users[user_id];
+  const templateVars = { user: user, };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
-  const username = req.cookies['username'];
+  const user_id = req.cookies['user_id']
+  const user = users[user_id];
 
-  const templateVars = { id, longURL, username };
+  const templateVars = { id, longURL, user, };
   res.render("urls_show", templateVars);
 });
 
@@ -102,15 +106,15 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.post('/login', (req, res) => {
-  const username = req.body.username;
+// app.post('/login', (req, res) => {
+//   const username = req.body.username;
 
-res.cookie('username', username);
-res.redirect('/urls');
-});
+//   res.cookie('username', username);
+//   res.redirect('/urls');
+// });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
 
   res.redirect('/urls');
 });
@@ -120,22 +124,21 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  console.log(req.body);
-  const id = generateRandomString();
+  const user_id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
 
   const user = {
-    id: id, 
+    user_id: user_id, 
     email: email,
     password: password,
   };
 
-  users[id] = user;
+  users[user_id] = user;
   console.log(users);
 
   //set cookie
-  res.cookie('user_id', id);
+  res.cookie('user_id', user_id);
 
   res.redirect('/urls');
 
