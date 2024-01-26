@@ -26,12 +26,12 @@ const urlDatabase = {
 
 const users = {
   abcdef: {
-    id: "abcdef",
+    user_id: "abcdef",
     email: "mon@example.com",
     password: "purple",
   },
   ghijkl: {
-    id: "ghijkl",
+    user_id: "ghijkl",
     email: "len@example.com",
     password: "fuzz",
   },
@@ -47,8 +47,12 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  console.log('req.cookies', req.cookies);
   const user_id = req.cookies['user_id'];
+  console.log('user_id', user_id);
+  console.log('users', users);
   const user = users[user_id];
+  console.log('user object', user);
   const templateVars = { 
     urls: urlDatabase, 
     user: user, 
@@ -160,7 +164,9 @@ app.post('/register', (req, res) => {
   };
 
   //add to database
+  //console.log('users', users);
   users[user_id] = user;
+  // console.log('user', user);
   // console.log(users);
 
   //set cookie
