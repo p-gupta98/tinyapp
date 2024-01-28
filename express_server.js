@@ -33,6 +33,16 @@ function getUserById(id) {
   return foundUser;
 }
 
+function findUrlIdById(id) {
+  let foundId = null;
+  for (const key in urlDatabase) {
+    if(key === id) {
+      foundId = key;
+    }
+  }
+  return foundId;
+};
+
 app.set("view engine", "ejs");
 
 //middleware
@@ -123,10 +133,16 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:id", (req, res, callback) => {
+app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
-  res.redirect(longURL);
+  const foundId = findUrlIdById(id);
+
+  if(!foundId) {
+    return res.status(400).send('id does not exist');
+  } else {
+    const longURL = urlDatabase[id];
+    res.redirect(longURL);
+  }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
