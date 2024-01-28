@@ -183,7 +183,15 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  const user_id = req.cookies.user_id;
+  const foundUser = getUserById(user_id);
+
+  if(foundUser) {
+    res.redirect('/urls');
+  } else {
+    //else render register
   res.render('register');
+  }
 });
 
 app.post('/register', (req, res) => {
