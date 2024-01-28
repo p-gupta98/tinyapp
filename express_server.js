@@ -5,11 +5,33 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
+//helper functions
 function generateRandomString() {
   const randomString = Math.random().toString(36).substring(2, 8);
   return randomString;
+};
+
+function getUserByEmail(email) {
+  let foundUser = null;
+  for (const user_id in users) {
+    const user = users[user_id];
+    if (user.email === email) {
+      foundUser = user;
+    }
+  }
+  return foundUser;
+};
+
+function getUserById(id) {
+  let foundUser = null;
+  for (const key in users) {
+    const user = users[key];
+    if(user.user_id === id) {
+      foundUser = user;
+    }
+  }
+  return foundUser;
 }
-generateRandomString();
 
 app.set("view engine", "ejs");
 
@@ -86,7 +108,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:id", (req, res) => {
+app.get("/u/:id", (req, res, callback) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
   res.redirect(longURL);
@@ -140,7 +162,18 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+
+  //if user is logged in redirect to /urls
+  const user_id = req.cookies.user_id;
+  const foundUser = getUserById(user_id);
+
+  if(foundUser) {
+    res.redirect('/urls');
+  } else {
+    //else render login
   res.render('login');
+  }
+
 });
 
 app.post('/logout', (req, res) => {
