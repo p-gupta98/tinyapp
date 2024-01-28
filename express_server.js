@@ -93,9 +93,17 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies['user_id'];
-  const user = users[user_id];
-  const templateVars = { user: user, };
-  res.render("urls_new", templateVars);
+  //const user_id = req.cookies.user_id;
+  const foundUser = getUserById(user_id);
+
+  if(!foundUser) {
+    res.redirect('/login');
+  } else {
+    //else render register
+    const templateVars = { user: foundUser, };
+    res.render("urls_new", templateVars);
+  }
+  //const user = users[user_id];
 });
 
 app.get("/urls/:id", (req, res) => {
