@@ -83,12 +83,19 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  const user_id = req.cookies.user_id;
+  const foundUser = getUserById(user_id);
+
+  if(!foundUser) {
+    return res.status(403).send('You have to log in first');
+  } else {
   const id = generateRandomString();
   const longURL = req.body.longURL;
   urlDatabase[id] = longURL;
   //console.log(urlDatabase); // Log the POST request body to the console
   //res.send("redirected to /urls/:id"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${id}`);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
