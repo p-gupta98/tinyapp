@@ -213,12 +213,22 @@ app.post('/urls/:id', (req, res) => {
   const id = req.params.id
   const foundId = findUrlIdById(id);
 
+  //check if url exists
   if(!foundId) {
     return res.status(400).send('id does not exist');
   } else {
+    const user_id = req.cookies['user_id']
+    const foundUser = getUserById(user_id);
+
+    //check if user is logged in
+    if(!foundUser) {
+      return res.status(403).send('You have to login/register first');
+    } else {
+
     const longURL = req.body.longURL;
     urlDatabase[id].longURL = longURL;
     res.redirect("/urls");
+    }
   }  
 });
 
