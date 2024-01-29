@@ -212,24 +212,26 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id
   const foundId = findUrlIdById(id);
+  const user_id = req.cookies['user_id']
+  const foundUser = getUserById(user_id);
+  
 
   //check if url exists
   if(!foundId) {
     return res.status(400).send('id does not exist');
-  } else {
-    const user_id = req.cookies['user_id']
-    const foundUser = getUserById(user_id);
-
     //check if user is logged in
-    if(!foundUser) {
-      return res.status(403).send('You have to login/register first');
-    } else {
-
+  } else if(!foundUser) {
+    return res.status(403).send('You have to login/register first');
+    //Check if the URL belongs to this user
+  } else {
+    const userURLs = urlsForUser(user_id);
+    if (!userURLs[id]) {
+    return res.status(401).send('You do not own this URL');
+  } 
     const longURL = req.body.longURL;
     urlDatabase[id].longURL = longURL;
     res.redirect("/urls");
-    }
-  }  
+  }
 });
 
 app.get("/hello", (req, res) => {
