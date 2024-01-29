@@ -19,7 +19,7 @@ const urlDatabase = {
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
-  },
+  }
 };
 
 const users = {
@@ -165,13 +165,28 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id].longURL;
-  const user_id = req.cookies['user_id']
-  const user = users[user_id];
 
-  const templateVars = { id, longURL, user, };
-  res.render("urls_show", templateVars);
+  const user_id = req.cookies['user_id']
+  const foundUser = getUserById(user_id);
+
+  if(!foundUser) {
+    return res.status(403).send('You have to login/register first');
+  } else {
+    const userURLs = urlsForUser(user_id);
+    const id = req.params.id;
+    if (!userURLs[id]) {
+      res.status(403).send('You do not own this URL');
+    };
+    const longURL = userURLs.longURL;
+    const user = users[user_id];
+    // const longURL = urlDatabase[id].longURL;
+    const templateVars = { 
+      id, 
+      longURL, 
+      user, 
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/u/:id", (req, res) => {
