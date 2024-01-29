@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -324,9 +325,10 @@ app.post('/register', (req, res) => {
   const user_id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
    //if email and password are empty
-   if (!email || !password) {
+   if (!email || !hashedPassword) {
     return res.status(400).send('Provide email and password') 
    }
 
@@ -349,7 +351,7 @@ app.post('/register', (req, res) => {
   const user = {
     user_id: user_id, 
     email: email,
-    password: password,
+    password: hashedPassword,
   };
 
   //add to database
