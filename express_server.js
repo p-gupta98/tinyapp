@@ -277,9 +277,12 @@ app.post('/login', (req, res) => {
   //was the user not in the database
   if(!foundUser) {
     return res.status(403).send('user not found');
+
   //if email was found match the passwords
   } else {
-    if (foundUser.password !== password) {
+    const result = bcrypt.compareSync(password, foundUser.password);
+    //if (foundUser.password !== password) {
+    if (!result) {
       return res.status(403).send('password does not match');
     }
   }
@@ -357,7 +360,7 @@ app.post('/register', (req, res) => {
   //add to database
   //console.log('users', users);
   users[user_id] = user;
-  // console.log('user', user);
+  //console.log('user', user);
   // console.log(users);
 
   //set cookie
