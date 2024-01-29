@@ -5,6 +5,36 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080; // default port 8080
 
+//global objects
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
+const urlDatabase = {
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
+};
+
+const users = {
+  aJ48lW: {
+    user_id: "aJ48lW",
+    email: "mon@example.com",
+    password: "purple",
+  },
+  ghijkl: {
+    user_id: "ghijkl",
+    email: "len@example.com",
+    password: "fuzz",
+  },
+};
+
 //helper functions
 function generateRandomString() {
   const randomString = Math.random().toString(36).substring(2, 8);
@@ -43,6 +73,21 @@ function findUrlIdById(id) {
   return foundId;
 };
 
+function urlsForUser(givenUser_id) {
+  const userURLs = {};
+  for (const urlID in urlDatabase) {
+    const userID = urlDatabase[urlID].userID;
+    // console.log(`Checking ${urlID}:`, urlDatabase[urlID]); // Log each URL being checked
+    if (userID === givenUser_id) {
+      // console.log(`Adding ${urlID} to userURLs`); // Log when a URL is matched and added
+      userURLs[urlID] = {longURL: urlDatabase[urlID].longURL, userID: userID, urlID: urlID,
+      };
+    }
+  }
+  return userURLs;
+};
+
+
 app.set("view engine", "ejs");
 
 //middleware
@@ -50,24 +95,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
 
-//global objects
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
-const users = {
-  abcdef: {
-    user_id: "abcdef",
-    email: "mon@example.com",
-    password: "purple",
-  },
-  ghijkl: {
-    user_id: "ghijkl",
-    email: "len@example.com",
-    password: "fuzz",
-  },
-};
 
 //get and post reqs
 app.get("/", (req, res) => {
@@ -79,17 +107,28 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  console.log('req.cookies', req.cookies);
   const user_id = req.cookies['user_id'];
-  console.log('user_id', user_id);
-  console.log('users', users);
-  const user = users[user_id];
-  console.log('user object', user);
-  const templateVars = { 
-    urls: urlDatabase, 
-    user: user, 
-  };
-  res.render("urls_index", templateVars);
+  const foundUser = getUserById(user_id);
+
+  if(!foundUser) {
+    return res.status(403).send('You have to login/register first');
+  } else {
+    // const id = Object.keys(urlDatabase);
+
+    const user = users[user_id];
+    // console.log('Current URL Database:', urlDatabase);
+    const userURLs = urlsForUser(user_id);
+    // console.log('User URLs:', userURLs);
+
+    const templateVars = { 
+      userURLs: userURLs, 
+      user: user, 
+    };
+
+    // console.log(userURLs);
+  
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -100,10 +139,12 @@ app.post("/urls", (req, res) => {
     return res.status(403).send('You have to log in first');
   } else {
   const id = generateRandomString();
-  const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  const givenLongURL = req.body.longURL;
+  urlDatabase[id] = {
+    longURL: givenLongURL,
+    userID: user_id,
+  };
   //console.log(urlDatabase); // Log the POST request body to the console
-  //res.send("redirected to /urls/:id"); // Respond with 'Ok' (we will replace this)
   res.redirect(`/urls/${id}`);
   }
 });
@@ -125,7 +166,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   const user_id = req.cookies['user_id']
   const user = users[user_id];
 
@@ -140,22 +181,23 @@ app.get("/u/:id", (req, res) => {
   if(!foundId) {
     return res.status(400).send('id does not exist');
   } else {
-    const longURL = urlDatabase[id];
+    const longURL = urlDatabase[id].longURL;
     res.redirect(longURL);
   }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id
-  const longURL = urlDatabase[id];
-  delete urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
+  // delete urlDatabase[id];
+  delete longURL;
   res.redirect("/urls");
 });
 
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
+  urlDatabase[id].longURL = longURL;
   res.redirect("/urls");
 });
 
