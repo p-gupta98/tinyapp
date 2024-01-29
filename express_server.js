@@ -27,12 +27,12 @@ const users = {
   aJ48lW: {
     user_id: "aJ48lW",
     email: "mon@example.com",
-    password: "purple",
+    password: bcrypt.hashSync("purple"),
   },
   ghijkl: {
     user_id: "ghijkl",
     email: "len@example.com",
-    password: "fuzz",
+    password: bcrypt.hashSync("fuzz"),
   },
 };
 
