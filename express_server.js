@@ -221,9 +221,9 @@ app.post('/urls/:id/delete', (req, res) => {
       return res.status(403).send('You have to login/register first');
     }
 
-    const longURL = urlDatabase[id];
-    // delete urlDatabase[id];
-    delete longURL;
+    //const longURL = urlDatabase[id];
+    delete urlDatabase[id];
+    //delete longURL;
     res.redirect("/urls");
   }
 });
@@ -328,10 +328,10 @@ app.post('/register', (req, res) => {
   const user_id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  
 
    //if email and password are empty
-   if (!email || !hashedPassword) {
+   if (!email || !password) {
     return res.status(400).send('Provide email and password') 
    }
 
@@ -351,6 +351,8 @@ app.post('/register', (req, res) => {
    }
 
   //passed all checks, create new user
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   const user = {
     user_id: user_id, 
     email: email,
