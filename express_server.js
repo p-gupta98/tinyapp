@@ -206,19 +206,24 @@ app.post('/urls/:id/delete', (req, res) => {
   const foundId = findUrlIdById(id);
   const user_id = req.cookies['user_id']
   const foundUser = getUserById(user_id);
+  const userURLs = urlsForUser(user_id);
 
   //check if url exists
   if(!foundId) {
     return res.status(400).send('id does not exist');
     //check if user is logged in
-  } else if(!foundUser) {
-    return res.status(403).send('You have to login/register first');
+  } else if (!userURLs[id]) {
+    return res.status(401).send('You do not own this URL');
   } else {
 
-  const longURL = urlDatabase[id].longURL;
-  // delete urlDatabase[id];
-  delete longURL;
-  res.redirect("/urls");
+    if(!foundUser) {
+      return res.status(403).send('You have to login/register first');
+    }
+
+    const longURL = urlDatabase[id];
+    // delete urlDatabase[id];
+    delete longURL;
+    res.redirect("/urls");
   }
 });
 
@@ -227,20 +232,22 @@ app.post('/urls/:id', (req, res) => {
   const foundId = findUrlIdById(id);
   const user_id = req.cookies['user_id']
   const foundUser = getUserById(user_id);
+  const userURLs = urlsForUser(user_id);
   
 
   //check if url exists
   if(!foundId) {
     return res.status(400).send('id does not exist');
-    //check if user is logged in
-  } else if(!foundUser) {
-    return res.status(403).send('You have to login/register first');
     //Check if the URL belongs to this user
-  } else {
-    const userURLs = urlsForUser(user_id);
-    if (!userURLs[id]) {
+  } else if (!userURLs[id]) {
     return res.status(401).send('You do not own this URL');
-  } 
+    //check if user is logged in
+  } else {
+   
+    if(!foundUser) {
+    return res.status(403).send('You have to login/register first');
+    }
+    
     const longURL = req.body.longURL;
     urlDatabase[id].longURL = longURL;
     res.redirect("/urls");
