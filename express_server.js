@@ -2,6 +2,7 @@ const express = require("express");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const helpers = require('./helpers');
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -36,57 +37,7 @@ const users = {
   },
 };
 
-//helper functions
-function generateRandomString() {
-  const randomString = Math.random().toString(36).substring(2, 8);
-  return randomString;
-};
 
-function getUserByEmail(email) {
-  let foundUser = null;
-  for (const user_id in users) {
-    const user = users[user_id];
-    if (user.email === email) {
-      foundUser = user;
-    }
-  }
-  return foundUser;
-};
-
-function getUserById(id) {
-  let foundUser = null;
-  for (const key in users) {
-    const user = users[key];
-    if(user.user_id === id) {
-      foundUser = user;
-    }
-  }
-  return foundUser;
-}
-
-function findUrlIdById(id) {
-  let foundId = null;
-  for (const key in urlDatabase) {
-    if(key === id) {
-      foundId = key;
-    }
-  }
-  return foundId;
-};
-
-function urlsForUser(givenUser_id) {
-  const userURLs = {};
-  for (const urlID in urlDatabase) {
-    const userID = urlDatabase[urlID].userID;
-    // console.log(`Checking ${urlID}:`, urlDatabase[urlID]); // Log each URL being checked
-    if (userID === givenUser_id) {
-      // console.log(`Adding ${urlID} to userURLs`); // Log when a URL is matched and added
-      userURLs[urlID] = {longURL: urlDatabase[urlID].longURL, userID: userID, urlID: urlID,
-      };
-    }
-  }
-  return userURLs;
-};
 
 
 app.set("view engine", "ejs");
@@ -113,7 +64,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.session.user_id;
  
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(!foundUser) {
     return res.status(403).send('You have to login/register first');
@@ -122,7 +73,7 @@ app.get("/urls", (req, res) => {
 
     const user = users[user_id];
     // console.log('Current URL Database:', urlDatabase);
-    const userURLs = urlsForUser(user_id);
+    const userURLs = helpers.urlsForUser(user_id);
     // console.log('User URLs:', userURLs);
 
     const templateVars = { 
@@ -138,12 +89,12 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(!foundUser) {
     return res.status(403).send('You have to log in first');
   } else {
-  const id = generateRandomString();
+  const id = helpers.generateRandomString();
   const givenLongURL = req.body.longURL;
   urlDatabase[id] = {
     longURL: givenLongURL,
@@ -156,7 +107,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(!foundUser) {
     res.redirect('/login');
@@ -170,12 +121,12 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(!foundUser) {
     return res.status(403).send('You have to login/register first');
   } else {
-    const userURLs = urlsForUser(user_id);
+    const userURLs = helpers.urlsForUser(user_id);
     const id = req.params.id;
     if (!userURLs[id]) {
       res.status(403).send('You do not own this URL');
@@ -194,7 +145,7 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
-  const foundId = findUrlIdById(id);
+  const foundId = helpers.findUrlIdById(id);
 
   if(!foundId) {
     return res.status(400).send('id does not exist');
@@ -206,10 +157,10 @@ app.get("/u/:id", (req, res) => {
 
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id
-  const foundId = findUrlIdById(id);
+  const foundId = helpers.findUrlIdById(id);
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
-  const userURLs = urlsForUser(user_id);
+  const foundUser = helpers.getUserById(user_id);
+  const userURLs = helpers.urlsForUser(user_id);
 
   //check if url exists
   if(!foundId) {
@@ -232,10 +183,10 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id
-  const foundId = findUrlIdById(id);
+  const foundId = helpers.findUrlIdById(id);
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
-  const userURLs = urlsForUser(user_id);
+  const foundUser = helpers.getUserById(user_id);
+  const userURLs = helpers.urlsForUser(user_id);
   
 
   //check if url exists
@@ -297,7 +248,7 @@ app.get('/login', (req, res) => {
 
   //if user is logged in redirect to /urls
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(foundUser) {
     res.redirect('/urls');
@@ -318,7 +269,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   const user_id = req.session.user_id;
-  const foundUser = getUserById(user_id);
+  const foundUser = helpers.getUserById(user_id);
 
   if(foundUser) {
     res.redirect('/urls');
@@ -329,7 +280,7 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  const user_id = generateRandomString();
+  const user_id = helpers.generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
   
