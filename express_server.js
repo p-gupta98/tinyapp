@@ -111,7 +111,8 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies['user_id'];
+  const user_id = req.session.user_id;
+ 
   const foundUser = getUserById(user_id);
 
   if(!foundUser) {
@@ -136,7 +137,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
 
   if(!foundUser) {
@@ -154,8 +155,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const user_id = req.cookies['user_id'];
-  //const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
 
   if(!foundUser) {
@@ -169,8 +169,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-
-  const user_id = req.cookies['user_id']
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
 
   if(!foundUser) {
@@ -208,7 +207,7 @@ app.get("/u/:id", (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id
   const foundId = findUrlIdById(id);
-  const user_id = req.cookies['user_id']
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
   const userURLs = urlsForUser(user_id);
 
@@ -234,7 +233,7 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id
   const foundId = findUrlIdById(id);
-  const user_id = req.cookies['user_id']
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
   const userURLs = urlsForUser(user_id);
   
@@ -289,15 +288,15 @@ app.post('/login', (req, res) => {
       return res.status(403).send('password does not match');
     }
   }
-
-  res.cookie('user_id', foundUser.user_id);
+  req.session.user_id = foundUser.user_id;
+ 
   res.redirect('/urls');
 });
 
 app.get('/login', (req, res) => {
 
   //if user is logged in redirect to /urls
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
 
   if(foundUser) {
@@ -310,13 +309,15 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+
+  req.session = null; //clear all cookies
+
 
   res.redirect('/login');
 });
 
 app.get('/register', (req, res) => {
-  const user_id = req.cookies.user_id;
+  const user_id = req.session.user_id;
   const foundUser = getUserById(user_id);
 
   if(foundUser) {
@@ -369,7 +370,8 @@ app.post('/register', (req, res) => {
   // console.log(users);
 
   //set cookie
-  res.cookie('user_id', user_id);
+  req.session.user_id = user_id;
+ 
 
   res.redirect('/urls');
 });
