@@ -55,7 +55,18 @@ app.use(morgan('dev'));
 
 //get and post reqs
 app.get("/", (req, res) => {
-  res.send("Hello!");
+
+  //if user is not logged in redirect to /login
+  const user_id = req.session.user_id;
+  const foundUser = helpers.getUserById(user_id);
+
+  if(!foundUser) {
+    res.redirect('/login');
+  } else {
+    //else send hello!
+    res.send("Hello!");
+  }
+
 });
 
 app.get("/urls.json", (req, res) => {
