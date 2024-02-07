@@ -6,29 +6,6 @@ const bcrypt = require("bcryptjs");
 //   "9sm5xK": "http://www.google.com"
 // };
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  }
-};
-
-const users = {
-  aJ48lW: {
-    user_id: "aJ48lW",
-    email: "mon@example.com",
-    password: bcrypt.hashSync("purple"),
-  },
-  ghijkl: {
-    user_id: "ghijkl",
-    email: "len@example.com",
-    password: bcrypt.hashSync("fuzz"),
-  },
-};
 
 
 
@@ -39,10 +16,10 @@ const generateRandomString = function generateRandomString() {
   return randomString;
 };
 
-const getUserById = function getUserById(id) {
+const getUserById = function getUserById(id, userDatabase) {
   let foundUser = null;
-  for (const key in users) {
-    const user = users[key];
+  for (const key in userDatabase) {
+    const user = userDatabase[key];
     if(user.user_id === id) {
       foundUser = user;
     }
@@ -50,7 +27,7 @@ const getUserById = function getUserById(id) {
   return foundUser;
 }
 
-const findUrlIdById = function findUrlIdById(id) {
+const findUrlIdById = function findUrlIdById(id, urlDatabase) {
   let foundId = null;
   for (const key in urlDatabase) {
     if(key === id) {
@@ -60,7 +37,7 @@ const findUrlIdById = function findUrlIdById(id) {
   return foundId;
 };
 
-const urlsForUser = function urlsForUser(givenUser_id) {
+const urlsForUser = function urlsForUser(givenUser_id, urlDatabase) {
   const userURLs = {};
   for (const urlID in urlDatabase) {
     const userID = urlDatabase[urlID].userID;
@@ -74,7 +51,7 @@ const urlsForUser = function urlsForUser(givenUser_id) {
   return userURLs;
 };
 
-const getUserByEmail = function getUserByEmail(email) {
+const getUserByEmail = function getUserByEmail(email, users) {
   let foundUser = null;
   for (const user_id in users) {
     const user = users[user_id];
